@@ -94,3 +94,37 @@ def test_encerramento_com_fila(service):
 
     assert resultado is True    # <-- Verifica que a sessão existia e foi encerrada com sucesso
     assert service.studio_room_repository.is_available(1) is False  # <-- Verifica que a sala não foi liberada porque ainda existe fila
+
+# 11. Reserva remove da fila
+
+def test_reserva_remove_da_fila(service):
+    service.join_waitlist(10, 3) # <--- Entra na fila de espera
+
+    resultado = service.reserve_room(10, 3) # <--- Remove da fila de espera e retorna true para a reserva do quarto
+
+    assert resultado is True
+
+# 12. Fluxo completo
+
+def test_fluxo_completo(service):
+    service.reserve_room(10, 1) # <--- Artista 10 reserva sala
+    service.join_waitlist(40, 1) # <--- Artista 40 entra ma fila de espera para a mesma sala
+    service.close_room_session(10, 1) # <--- Verifica que a sessão existia e foi encerrada com sucesso
+
+    resultado = service.reserve_room(40, 1) # <--- Remove da fila de espera e retorna true para a reserva do quarto
+
+    assert resultado is True
+
+# 13. Não pode reservar se NÃO for o primeiro da fila
+
+def test_reserva_nao_eh_primeiro_da_fila(service):
+    service.reserve_room(10, 1)  # <-- Artista 10 ocupa a sala
+    service.join_waitlist(40, 1)  # <-- Artista 40 entra na fila (1º)
+    service.join_waitlist(50, 1)  # <-- Artista 50 entra na fila (2º)
+
+    service.close_room_session(10, 1)  # <-- Encerra a sessão, sala continua ocupada por causa da fila
+
+    print(service.studio_room_repository.is_available(1))
+    resultado = service.reserve_room(50, 1)  # <-- Artista 50 tenta reservar (não é o primeiro da fila)
+
+    assert resultado is False  # <-- Deve falhar porque só o primeiro da fila pode reservar

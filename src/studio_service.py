@@ -21,14 +21,19 @@ class StudioService:
         if not self.artist_repository.has_paid_subscription(artist_id):
             return False
 
-        if not self.studio_room_repository.is_available(room_id):
+        next_artist = self.waitlist_repository.next_artist(room_id)             # Alteração: agora a sala só é liberada se não houver fila de espera.
+        if next_artist is not None and next_artist != artist_id:                # Antes, a sala era liberada independentemente da fila, o que quebrava
+            return False                                                        # a regra de prioridade dos artistas na lista de espera.
+
+        next_artist = self.waitlist_repository.next_artist(room_id)
+
+        if next_artist is not None and next_artist != artist_id:
+            return False
+
+        if next_artist is None and not self.studio_room_repository.is_available(room_id):
             return False
 
         if self.session_repository.count_active_sessions(artist_id) >= 2:
-            return False
-
-        next_artist = self.waitlist_repository.next_artist(room_id)
-        if next_artist is not None and next_artist != artist_id:
             return False
 
         self.studio_room_repository.mark_unavailable(room_id)
