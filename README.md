@@ -59,13 +59,13 @@ Os testes foram desenvolvidos buscando:
 1. Clone o repositório:
 
 ```bash
-git clone <LINK_DO_REPOSITORIO>
+git clone <https://github.com/joaobleyb/testes-de-componentes>
 ```
 
 2. Acesse a pasta:
 
 ```bash
-cd <NOME_DO_PROJETO>
+cd tests/components
 ```
 
 3. Instale as dependências:
@@ -84,7 +84,7 @@ pytest
 
 ## 🎥 Vídeo Explicativo
 
-📌 Link: *(será adicionado o link do video mais pra frente)*
+📌 Link: (https://youtu.be/rsI-6SnviRo)
 
 No vídeo é apresentado:
 
