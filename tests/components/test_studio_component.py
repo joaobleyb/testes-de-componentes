@@ -20,7 +20,7 @@ def service():
 def test_reserva_com_sucesso(service):
     resultado = service.reserve_room(10, 1) 
 
-    assert resultado is True
+    assert resultado is True # <--- Deve retornar true pois nao possui problema algum
 
 # 2. Teste de Reserva de sala inexistente
 
@@ -147,3 +147,66 @@ def test_nao_pode_entrar_fila_sala_disponivel(service):
     resultado = service.join_waitlist(10, 1)  # <-- Tenta entrar na fila de uma sala livre
 
     assert resultado is False  # <-- Deve falhar porque não faz sentido fila com sala livre
+
+# 16. Não pode entrar na fila se já estiver usando a sala
+
+def test_nao_pode_entrar_fila_se_ja_esta_na_sala(service):
+    service.reserve_room(10, 1)  # <-- Artista 10 já está na sala
+
+    resultado = service.join_waitlist(10, 1)  # <-- Tenta entrar na fila da mesma sala
+
+    assert resultado is False  # <-- Deve falhar (não pode estar na sessão e na fila ao mesmo tempo)
+
+# 17. Reserva deve respeitar fila mesmo após encerramento
+
+def test_reserva_respeita_fila_mesmo_apos_encerramento(service):
+    service.reserve_room(10, 1)  # <-- Sala ocupada
+    service.join_waitlist(40, 1)  # <-- Artista entra na fila
+
+    service.close_room_session(10, 1)  # <-- Sessão encerrada (sala ainda bloqueada pela fila)
+
+    resultado = service.reserve_room(50, 1)  # <-- Outro artista tenta reservar
+
+    assert resultado is False  # <-- Deve falhar porque existe fila
+
+# 18. Não pode entrar na fila com artista inexistente
+
+def test_fila_artista_inexistente(service):
+    resultado = service.join_waitlist(999, 1)  # <-- Artista não existe
+
+    assert resultado is False  # <-- Deve falhar
+
+# 19. Não pode reservar sala já ocupada
+
+def test_reserva_sala_ocupada(service):
+    service.reserve_room(10, 1)  # <-- Sala já está ocupada
+
+    resultado = service.reserve_room(40, 1)  # <-- Outro artista tenta reservar a mesma sala
+
+    assert resultado is False  # <-- Deve falhar porque a sala não está disponível
+
+# 20. Quando o primeiro da fila sai, o próximo assume
+
+def test_ordem_da_fila_completa(service):
+    service.reserve_room(10, 1)      # <-- Sala ocupada
+    service.join_waitlist(40, 1)     # <-- Primeiro da fila
+    service.join_waitlist(50, 1)     # <-- Segundo da fila
+
+    service.close_room_session(10, 1)
+
+    service.reserve_room(40, 1)      # <-- Primeiro entra
+    service.close_room_session(40, 1)
+
+    resultado = service.reserve_room(50, 1)  # <-- Segundo tenta entrar
+
+    assert resultado is True
+    
+# 21. Fila de uma sala não afeta outra sala
+
+def test_fila_nao_interfere_em_outra_sala(service):
+    service.reserve_room(10, 1)      # <-- Artista 10 reserva a sala 1
+    service.join_waitlist(40, 1)     # <-- Artista 40 entra na fila da sala 1
+
+    resultado = service.reserve_room(40, 2)  # <-- Mesmo artista tenta reservar a sala 2 (válido e existe)
+
+    assert resultado is True         # <-- Deve ser True porque a fila da sala 1 não interfere na sala 2

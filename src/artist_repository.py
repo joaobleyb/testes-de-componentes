@@ -5,6 +5,7 @@ class ArtistRepository:
             20: {"name": "Bruno", "blocked": True, "subscription_paid": True},
             30: {"name": "Carla", "blocked": False, "subscription_paid": False},
             40: {"name": "Diego", "blocked": False, "subscription_paid": True},
+            50: {"name": "Novo", "blocked": False, "subscription_paid": True}
         }
 
     def exists(self, artist_id: int) -> bool:
