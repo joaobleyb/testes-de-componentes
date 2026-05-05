@@ -124,7 +124,26 @@ def test_reserva_nao_eh_primeiro_da_fila(service):
 
     service.close_room_session(10, 1)  # <-- Encerra a sessão, sala continua ocupada por causa da fila
 
-    print(service.studio_room_repository.is_available(1))
     resultado = service.reserve_room(50, 1)  # <-- Artista 50 tenta reservar (não é o primeiro da fila)
 
     assert resultado is False  # <-- Deve falhar porque só o primeiro da fila pode reservar
+
+# 14. Primeiro da fila consegue reservar
+
+def test_primeiro_da_fila_consegue_reservar(service):
+    service.reserve_room(10, 1)  # <-- Sala ocupada pelo artista 10
+    service.join_waitlist(40, 1)  # <-- Artista 40 entra na fila (1º)
+    service.join_waitlist(50, 1)  # <-- Artista 50 entra na fila (2º)
+
+    service.close_room_session(10, 1)  # <-- Encerra sessão (sala continua bloqueada pela fila)
+
+    resultado = service.reserve_room(40, 1)  # <-- Primeiro da fila tenta reservar
+
+    assert resultado is True  # <-- Deve conseguir reservar
+
+# 15. Não pode entrar na fila se a sala estiver disponível
+
+def test_nao_pode_entrar_fila_sala_disponivel(service):
+    resultado = service.join_waitlist(10, 1)  # <-- Tenta entrar na fila de uma sala livre
+
+    assert resultado is False  # <-- Deve falhar porque não faz sentido fila com sala livre
